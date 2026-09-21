@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Inside Market Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;
+    --panel:#0d0d0d;
+    --border:#1f1f1f;
+    --text:#f2f2f2;
+    --dim:#7a7a7a;
+    --dim2:#454545;
+    --accent:#9068C6;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Archivo', sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:28px 32px 8px;
+  }
+  header h1{
+    font-family:'Share Tech Mono', monospace;
+    letter-spacing:0.35em;
+    font-size:18px;
+    font-weight:400;
+    margin:0;
+    color:var(--text);
+  }
+  header p{
+    font-family:'Share Tech Mono', monospace;
+    letter-spacing:0.15em;
+    font-size:11px;
+    color:var(--dim);
+    margin:8px 0 0;
+  }
+  .autonomous-note{
+    margin:10px 32px 0;
+    padding:8px 14px;
+    border:1px dashed var(--border);
+    display:inline-block;
+    font-family:'Share Tech Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    color:var(--dim2);
+  }
+
+  :root{
+    --panel-h:clamp(480px, 70vh, 1100px);
+  }
+
+  .news-strip{
+    margin:8px 39px 44px;
+    max-width:calc(100% - 78px);
+    display:block;
+    cursor:pointer;
+  }
+  .news-strip img{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  .news-strip.empty{
+    cursor:default;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:80px;
+    border:1px dashed var(--dim2);
+  }
+  .news-strip.empty span{
+    font-family:'Share Tech Mono', monospace;
+    letter-spacing:0.15em;
+    font-size:11px;
+    color:var(--dim2);
+  }
+
+  .layout{
+    display:flex;
+    align-items:flex-start;
+    gap:24px;
+    padding:8px 32px 32px;
+    width:fit-content;
+    max-width:100%;
+  }
+
+  .section{
+    width:fit-content;
+  }
+  .section[data-source="gex"]{
+    margin-top:-22px;
+  }
+  .section-title{
+    font-family:'Share Tech Mono', monospace;
+    letter-spacing:0.25em;
+    font-size:15px;
+    color:var(--text);
+    margin:0 0 12px;
+  }
+  .unified-source-title{
+    margin:0 57px 16px;
+  }
+
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    margin:0 57px 18px;
+  }
+  .tab{
+    font-family:'Share Tech Mono', monospace;
+    letter-spacing:0.15em;
+    font-size:13px;
+    color:var(--dim);
+    background:none;
+    border:none;
+    border-bottom:2px solid transparent;
+    padding:0 0 6px;
+    cursor:pointer;
+  }
+  .tab:hover{ color:var(--text); }
+  .tab.active{
+    color:var(--text);
+    border-bottom-color:var(--text);
+    font-weight:700;
+  }
+  .tab.empty{ opacity:0.3; }
+
+  .notes-chip{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 16px 9px 14px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    text-decoration:none;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .notes-chip:hover{
+    border-color:var(--text);
+    border-left-color:var(--accent);
+    background:#151515;
+  }
+  .notes-chip .label{
+    font-family:'Share Tech Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.2em;
+    color:var(--dim);
+  }
+  .notes-chip:hover .label{ color:var(--text); }
+  .notes-chip .arrow{
+    font-family:'Share Tech Mono', monospace;
+    font-size:12px;
+    color:var(--accent);
+  }
+
+  .asset-info-title{
+    font-family:'Share Tech Mono', monospace;
+    font-size:clamp(32px, 3.4vw, 46px);
+    font-weight:400;
+    letter-spacing:-0.01em;
+    line-height:1;
+    color:var(--text);
+    margin:0 57px 20px;
+    padding-left:16px;
+    border-left:5px solid var(--accent);
+  }
+
+  .frame{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:var(--panel-h);
+    width:fit-content;
+    min-width:260px;
+  }
+  .frame img{
+    height:100%;
+    width:auto;
+    max-width:none;
+    display:block;
+    cursor:zoom-in;
+  }
+  .frame img:fullscreen,
+  .frame img:-webkit-full-screen{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#000;
+  }
+  .placeholder{
+    font-family:'Share Tech Mono', monospace;
+    color:var(--dim);
+    font-size:12px;
+    letter-spacing:0.15em;
+    text-align:center;
+  }
+
+  .updated{
+    margin:0 32px 32px;
+    font-family:'Share Tech Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.12em;
+    color:var(--dim2);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>THE INSIDE MARKET TERMINAL</h1>
+    <p>Inteligencia de mercados &middot; Anal&iacute;tica avanzada &middot; Actualizaci&oacute;n intrad&iacute;a</p>
+  </header>
+  <span class="autonomous-note">version aut&oacute;noma &middot; sin login &middot; funciona con la Mac apagada</span>
+
+  <a class="news-strip" id="news-strip" href="#" target="_blank" rel="noopener" hidden>
+    <img id="news-img" src="" alt="fundamental">
+  </a>
+  <div class="news-strip empty" id="news-empty"><span>fundamental &middot; sin publicar</span></div>
+
+  <div class="tabs" id="unified-tabs"></div>
+
+  <h2 class="asset-info-title" id="asset-info" data-info-title></h2>
+
+  <p class="section-title unified-source-title" id="unified-source-title" hidden>PRICE IMPULSE &amp; POSITIONING MONITOR</p>
+
+  <div class="layout" id="layout"></div>
+
+  <p class="updated" id="global-updated"></p>
+
+  <script>
+    // Version 100% estatica: no hay servidor detras. Cada imagen se prueba
+    // directo contra el repo publico de imagenes (se hace HEAD -- no baja el
+    // archivo completo -- para saber si existe y cuando se actualizo).
+    const IMG_BASE = 'https://raw.githubusercontent.com/jttyr/inside-terminal-images/main/images/';
+
+    const SOURCES = [
+      { key: 'market-drivers', label: 'MARKET DRIVERS' },
+      { key: 'gex', label: 'GEX' },
+      { key: 'valuation', label: 'MACRO VALUATION' },
+    ];
+    const sourceKeys = SOURCES.map(s => s.key);
+
+    // Cada activo puede tener un ticker de archivo distinto por fuente
+    // (p.ej. ES en Market Drivers = SPY en GEX) -- espejo de app.py.
+    const ASSET_DEFS = [
+      { label: 'ES', tickers: { 'market-drivers': 'ES', gex: 'SPY' } },
+      { label: 'NQ', tickers: { 'market-drivers': 'NQ', gex: 'QQQ' } },
+      { label: 'DJI', tickers: { 'market-drivers': 'DJI', gex: 'DIA' } },
+      { label: 'XAUUSD', tickers: { 'market-drivers': 'XAUUSD', gex: 'GLD' } },
+      // Espacios listos para cuando se conecten (ver README) -- por ahora
+      // no hay workflow que publique estos archivos, se veran vacios.
+      { label: 'PETROLEOS', tickers: { valuation: 'OIL' } },
+      { label: 'DXY', tickers: { valuation: 'DXY' } },
+      { label: 'US02Y', tickers: { valuation: 'US02Y' } },
+      { label: 'US10Y', tickers: { valuation: 'US10Y' } },
+      { label: 'US30Y', tickers: { valuation: 'US30Y' } },
+    ];
+
+    function fmtDate(d) {
+      const p = n => String(n).padStart(2, '0');
+      return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    async function probeImage(ticker) {
+      if (!ticker) return { has_card: false, updated: null, epoch: -Infinity, url: null };
+      const url = IMG_BASE + ticker + '.png';
+      try {
+        const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+        if (!res.ok) return { has_card: false, updated: null, epoch: -Infinity, url };
+        const lm = res.headers.get('last-modified');
+        const d = lm ? new Date(lm) : new Date();
+        return { has_card: true, updated: fmtDate(d), epoch: d.getTime(), url: url + '?t=' + Date.now() };
+      } catch {
+        return { has_card: false, updated: null, epoch: -Infinity, url };
+      }
+    }
+
+    async function buildAssetsData() {
+      const assets = [];
+      for (const def of ASSET_DEFS) {
+        const entry = { label: def.label };
+        let hasAny = false;
+        for (const key of sourceKeys) {
+          const info = await probeImage(def.tickers[key]);
+          entry[key] = info;
+          hasAny = hasAny || info.has_card;
+        }
+        entry.has_any = hasAny;
+        assets.push(entry);
+      }
+      return assets;
+    }
+
+    async function probeNews() {
+      const banner = await probeImage('fundamental_banner');
+      const full = await probeImage('fundamental_full');
+      const strip = document.getElementById('news-strip');
+      const empty = document.getElementById('news-empty');
+      if (banner.has_card) {
+        document.getElementById('news-img').src = banner.url;
+        strip.href = full.has_card ? full.url : banner.url;
+        strip.hidden = false;
+        empty.hidden = true;
+      } else {
+        strip.hidden = true;
+        empty.hidden = false;
+      }
+    }
+
+    let assetsData = [];
+
+    function assetByLabel(label) {
+      return assetsData.find(a => a.label === label);
+    }
+
+    const globalUpdatedEl = document.getElementById('global-updated');
+    function refreshGlobalUpdated(asset) {
+      let best = null;
+      sourceKeys.forEach(key => {
+        const info = asset[key];
+        if (info.has_card && (!best || info.epoch > best.epoch)) best = info;
+      });
+      globalUpdatedEl.textContent = best ? ('actualizado ' + best.updated) : '';
+    }
+
+    function renderAsset(label) {
+      document.querySelectorAll('#unified-tabs .tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.label === label);
+      });
+      const asset = assetByLabel(label);
+      document.getElementById('asset-info').textContent = asset.label;
+
+      const unifiedTitleEl = document.getElementById('unified-source-title');
+      unifiedTitleEl.hidden = !(asset['market-drivers'].has_card || asset['gex'].has_card);
+
+      sourceKeys.forEach(key => {
+        const info = asset[key];
+        const sectionEl = document.querySelector(`.section[data-source="${key}"]`);
+        const frame = sectionEl.querySelector('[data-frame]');
+        if (info.has_card) {
+          sectionEl.hidden = false;
+          frame.innerHTML = `<img class="card-img" src="${info.url}" alt="${label}">`;
+          frame.querySelector('img').addEventListener('load', fitPanels);
+        } else {
+          sectionEl.hidden = true;
+          frame.innerHTML = '';
+        }
+      });
+      refreshGlobalUpdated(asset);
+    }
+
+    function buildLayout() {
+      const layout = document.getElementById('layout');
+      layout.innerHTML = '';
+      SOURCES.forEach(src => {
+        const section = document.createElement('section');
+        section.className = 'section';
+        section.dataset.source = src.key;
+        section.hidden = true;
+        if (src.key !== 'market-drivers' && src.key !== 'gex') {
+          const p = document.createElement('p');
+          p.className = 'section-title';
+          p.textContent = src.label;
+          section.appendChild(p);
+        }
+        const frame = document.createElement('div');
+        frame.className = 'frame';
+        frame.dataset.frame = '';
+        section.appendChild(frame);
+        layout.appendChild(section);
+
+        frame.addEventListener('click', (e) => {
+          const img = e.target.closest('img');
+          if (!img) return;
+          if (img.requestFullscreen) img.requestFullscreen();
+          else if (img.webkitRequestFullscreen) img.webkitRequestFullscreen();
+        });
+      });
+    }
+
+    function buildTabs() {
+      const tabsEl = document.getElementById('unified-tabs');
+      tabsEl.innerHTML = '';
+      assetsData.forEach((a, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'tab' + (a.has_any ? '' : ' empty') + (i === 0 ? ' active' : '');
+        btn.dataset.label = a.label;
+        btn.textContent = a.label;
+        btn.addEventListener('click', () => renderAsset(a.label));
+        tabsEl.appendChild(btn);
+      });
+      const notesChip = document.createElement('a');
+      notesChip.className = 'notes-chip';
+      notesChip.href = 'notes.html';
+      notesChip.target = '_blank';
+      notesChip.rel = 'noopener';
+      notesChip.title = 'Notas personales';
+      notesChip.innerHTML = '<span class="label">NOTAS</span><span class="arrow">&#8599;</span>';
+      tabsEl.appendChild(notesChip);
+    }
+
+    const root = document.documentElement;
+    const OUTER_PADDING = 64;
+    const MIN_H = 320;
+    const MAX_H = 2200;
+
+    function fitPanels() {
+      const layout = document.getElementById('layout');
+      const frameEl = layout.querySelector('.frame:not([hidden])') || layout.querySelector('.frame');
+      if (!frameEl) return;
+      const currentH = parseFloat(getComputedStyle(frameEl).height);
+      const currentLayoutWidth = layout.scrollWidth;
+      if (!currentH || !currentLayoutWidth) return;
+      const widthPerHeight = currentLayoutWidth / currentH;
+      const availableWidth = window.innerWidth - OUTER_PADDING - 4;
+      const idealH = Math.max(MIN_H, Math.min(MAX_H, availableWidth / widthPerHeight));
+      root.style.setProperty('--panel-h', Math.floor(idealH) + 'px');
+    }
+
+    window.addEventListener('load', fitPanels);
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitPanels, 120);
+    });
+
+    (async function init() {
+      buildLayout();
+      probeNews();
+      assetsData = await buildAssetsData();
+      buildTabs();
+      const firstWithData = assetsData.find(a => a.has_any) || assetsData[0];
+      renderAsset(firstWithData.label);
+      fitPanels();
+
+      setInterval(async () => {
+        const current = document.querySelector('#unified-tabs .tab.active').dataset.label;
+        assetsData = await buildAssetsData();
+        renderAsset(current);
+      }, 60000);
+    })();
+  </script>
+</body>
+</html>

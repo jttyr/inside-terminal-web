@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notas — The Inside Market Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;
+    --panel:#0d0d0d;
+    --border:#1f1f1f;
+    --text:#f2f2f2;
+    --dim:#7a7a7a;
+    --dim2:#454545;
+    --accent:#9068C6;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{ display:none !important; }
+  html,body{
+    margin:0;
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Mono', 'Share Tech Mono', monospace;
+  }
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:20px 24px;
+    border-bottom:1px solid var(--border);
+  }
+  header h1{
+    font-family:'Share Tech Mono', monospace;
+    font-size:15px;
+    letter-spacing:0.25em;
+    font-weight:400;
+    margin:0;
+    padding-left:14px;
+    border-left:4px solid var(--accent);
+  }
+  header .note{
+    font-size:10.5px;
+    color:var(--dim2);
+    letter-spacing:0.08em;
+  }
+  header a{
+    font-size:11px;
+    color:var(--dim);
+    text-decoration:none;
+    letter-spacing:0.15em;
+  }
+  header a:hover{ color:var(--text); }
+
+  .layout{
+    display:flex;
+    height:calc(100vh - 64px);
+  }
+
+  .col-titles{
+    width:33%;
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    min-width:220px;
+  }
+  .col-titles .new-btn{
+    margin:14px;
+    padding:10px;
+    background:none;
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:inherit;
+    font-size:12px;
+    letter-spacing:0.1em;
+    cursor:pointer;
+    border-radius:6px;
+  }
+  .col-titles .new-btn:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .note-list{
+    overflow-y:auto;
+    flex:1;
+  }
+  .note-item{
+    padding:12px 16px;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+    color:var(--dim);
+  }
+  .note-item:hover{ background:var(--panel); }
+  .note-item.active{
+    color:var(--text);
+    background:var(--panel);
+    border-left:3px solid var(--accent);
+  }
+  .note-item .t{
+    font-size:13px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .note-item .d{
+    font-size:10px;
+    color:var(--dim2);
+    margin-top:4px;
+  }
+  .empty-list{
+    padding:24px 16px;
+    font-size:11px;
+    color:var(--dim2);
+    letter-spacing:0.08em;
+  }
+
+  .col-desc{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+  .col-desc .toolbar{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    padding:12px 16px;
+    border-bottom:1px solid var(--border);
+  }
+  .col-desc .toolbar button{
+    background:none;
+    border:1px solid var(--border);
+    color:var(--dim);
+    font-family:inherit;
+    font-size:11px;
+    letter-spacing:0.1em;
+    padding:8px 14px;
+    cursor:pointer;
+    border-radius:6px;
+  }
+  .col-desc .toolbar button:hover{ color:var(--text); border-color:var(--text); }
+  .col-desc .toolbar button.danger:hover{ color:#f87171; border-color:#f87171; }
+
+  .title-input{
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--text);
+    font-family:inherit;
+    font-size:22px;
+    letter-spacing:0.02em;
+    padding:20px 24px 8px;
+    width:100%;
+  }
+  .title-input::placeholder{ color:var(--dim2); }
+
+  .body-input{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    resize:none;
+    color:var(--text);
+    font-family:inherit;
+    font-size:14px;
+    line-height:1.7;
+    padding:8px 24px 24px;
+    width:100%;
+  }
+  .body-input::placeholder{ color:var(--dim2); }
+
+  .placeholder-panel{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--dim2);
+    font-size:12px;
+    letter-spacing:0.1em;
+  }
+
+  @media (max-width:720px){
+    .layout{ flex-direction:column; height:auto; }
+    .col-titles{ width:100%; border-right:none; border-bottom:1px solid var(--border); }
+  }
+
+  .print-header{
+    display:none;
+  }
+
+  @media print{
+    header, .col-titles, .toolbar{ display:none !important; }
+    .layout{ height:auto; }
+    body{ background:#fff; color:#000; font-family:'Times New Roman', Times, serif; }
+    .title-input, .body-input{
+      color:#000;
+      padding:0 0 12px;
+      font-family:'Times New Roman', Times, serif;
+    }
+    .title-input{ font-size:20px; }
+    .print-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      font-family:'Times New Roman', Times, serif;
+      font-size:11px;
+      letter-spacing:0.02em;
+      color:#000;
+      padding:0 24px;
+      margin-top:16px;
+      border-bottom:1px solid #000;
+      padding-bottom:8px;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>NOTAS</h1>
+    <span class="note">se guardan solo en este navegador &middot; nunca se suben al servidor</span>
+    <a href="index.html">&larr; volver al terminal</a>
+  </header>
+
+  <div class="layout">
+    <div class="col-titles">
+      <button class="new-btn" id="new-note">+ NUEVA NOTA</button>
+      <div class="note-list" id="note-list"></div>
+    </div>
+    <div class="col-desc" id="editor" hidden>
+      <div class="toolbar">
+        <button id="download-pdf">DESCARGAR PDF</button>
+        <button id="delete-note" class="danger">BORRAR</button>
+      </div>
+      <div class="print-header" id="print-header">
+        <span id="print-date"></span>
+        <span id="print-label"></span>
+      </div>
+      <input class="title-input" id="note-title" placeholder="Título" maxlength="120">
+      <textarea class="body-input" id="note-body" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <div class="placeholder-panel" id="placeholder">selecciona o crea una nota</div>
+  </div>
+
+  <script>
+    // Todo vive en localStorage del navegador -- este servidor nunca ve el
+    // contenido de tus notas, ni al guardarlas ni al exportarlas a PDF.
+    const STORAGE_KEY = 'inside-terminal-notes';
+
+    function loadNotes() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch { return []; }
+    }
+    function saveNotes(notes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    }
+
+    let notes = loadNotes();
+    let activeId = null;
+
+    const listEl = document.getElementById('note-list');
+    const editorEl = document.getElementById('editor');
+    const placeholderEl = document.getElementById('placeholder');
+    const titleEl = document.getElementById('note-title');
+    const bodyEl = document.getElementById('note-body');
+
+    function fmtDate(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+             ' ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderList() {
+      if (!notes.length) {
+        listEl.innerHTML = '<div class="empty-list">sin notas todavía</div>';
+        return;
+      }
+      const sorted = [...notes].sort((a, b) => b.updated - a.updated);
+      listEl.innerHTML = '';
+      sorted.forEach(n => {
+        const item = document.createElement('div');
+        item.className = 'note-item' + (n.id === activeId ? ' active' : '');
+        item.innerHTML = `<div class="t">${escapeHtml(n.title || 'Sin título')}</div><div class="d">${fmtDate(n.updated)}</div>`;
+        item.addEventListener('click', () => selectNote(n.id));
+        listEl.appendChild(item);
+      });
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function selectNote(id) {
+      activeId = id;
+      const n = notes.find(x => x.id === id);
+      if (!n) return;
+      titleEl.value = n.title;
+      bodyEl.value = n.body;
+      editorEl.hidden = false;
+      placeholderEl.hidden = true;
+      renderList();
+    }
+
+    function newNote() {
+      const n = { id: Date.now().toString(36), title: '', body: '', updated: Date.now() };
+      notes.push(n);
+      saveNotes(notes);
+      selectNote(n.id);
+      titleEl.focus();
+    }
+
+    function currentNote() {
+      return notes.find(x => x.id === activeId);
+    }
+
+    function persistCurrent() {
+      const n = currentNote();
+      if (!n) return;
+      n.title = titleEl.value;
+      n.body = bodyEl.value;
+      n.updated = Date.now();
+      saveNotes(notes);
+      renderList();
+    }
+
+    let saveTimer;
+    function debouncedSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(persistCurrent, 300);
+    }
+
+    titleEl.addEventListener('input', debouncedSave);
+    bodyEl.addEventListener('input', debouncedSave);
+
+    document.getElementById('new-note').addEventListener('click', newNote);
+
+    document.getElementById('delete-note').addEventListener('click', () => {
+      const n = currentNote();
+      if (!n) return;
+      if (!confirm('¿Borrar esta nota? No se puede deshacer.')) return;
+      notes = notes.filter(x => x.id !== n.id);
+      saveNotes(notes);
+      activeId = null;
+      editorEl.hidden = true;
+      placeholderEl.hidden = false;
+      renderList();
+    });
+
+    // "21 Sep '26 . 2:22" -- formato fijo para el membrete de la exportacion,
+    // sin importar el idioma del navegador (toLocaleString varia entre equipos).
+    function formatPrintDate(ts) {
+      const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const d = new Date(ts);
+      const day = d.getDate();
+      const mon = MESES[d.getMonth()];
+      const yy = String(d.getFullYear()).slice(-2);
+      let h = d.getHours() % 12;
+      if (h === 0) h = 12;
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${day} ${mon} '${yy} . ${h}:${mm}`;
+    }
+
+    document.getElementById('download-pdf').addEventListener('click', () => {
+      persistCurrent();
+      const title = titleEl.value || 'Sin título';
+      document.title = title + ' — Notas';
+      document.getElementById('print-date').textContent = formatPrintDate(Date.now());
+      document.getElementById('print-label').textContent = 'INSIDE NOTES : ' + title;
+      window.print();
+    });
+
+    renderList();
+    if (notes.length) {
+      selectNote([...notes].sort((a, b) => b.updated - a.updated)[0].id);
+    }
+  </script>
+</body>
+</html>
